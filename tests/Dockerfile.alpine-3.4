@@ -3,7 +3,6 @@ FROM alpine:3.4
 RUN echo "===> (temporary) Installing sudo ..."  && \
     apk --update add sudo                        && \
     apk add bash                                 && \
-    apk add shadow                               && \
     \
     \
     echo "===> Adding Python runtime..."  && \
