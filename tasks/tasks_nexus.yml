@@ -1,0 +1,90 @@
+---
+
+  - name: Nexus | Test if nexus installed
+    shell: test -x /usr/local/bin/nexus
+    ignore_errors: true
+    register: nexus_exists
+    tags:
+      - nexus
+
+  - name: Nexus | Create Nexus group
+    group: name="{{nexus_user}}" state="present"
+    become: yes
+    tags:
+      - nexus
+
+  - name: Nexus | Create Nexus user
+    user: name="{{nexus_user}}" group="{{nexus_user}}"  comment="Sonatype Nexus user" home="{{ nexus_home_dir }}" shell="/bin/bash" createhome="yes"
+    become: yes
+    tags:
+      - nexus
+
+  - name: Nexus | Download Nexus distribution
+    get_url:
+      url: '{{nexus_distribution_url}}/nexus-{{ nexus_version }}-unix.tar.gz'
+      dest: '/tmp/nexus-{{ nexus_version }}-unix.tar.gz'
+      sha256sum: '{{ nexus_sha256sum | default(omit) }}'
+      force: no
+      validate_certs: no
+    when: nexus_exists | failed
+    tags:
+      - nexus
+
+  - name: Nexus | Unpack distribution
+    unarchive: src="/tmp/nexus-{{ nexus_version }}-unix.tar.gz" dest="{{ nexus_base_install_dir }}" remote_src="yes" owner="nexus" group="root" mode="g=rw,o-w" creates="{{ nexus_base_install_dir }}/nexus-{{ nexus_version }}"
+    when: nexus_exists | failed
+    become: yes
+    tags:
+      - nexus
+
+  - name: Nexus | Link version
+    file:
+      src: "{{ nexus_base_install_dir }}/nexus-{{ nexus_version }}"
+      dest: "{{ nexus_base_install_dir }}/nexus"
+      state: link
+      owner: nexus
+      group: root
+    become: yes
+    tags:
+      - nexus
+
+  - block:
+
+    - name: Nexus | Template SystemD script
+      template: src="{{role_dir}}/templates/init/nexus.service.j2" dest="/etc/systemd/system/nexus.service"
+      become: yes
+      tags:
+        - nexus
+
+    when: upstart_system == "systemd"
+
+  - block:
+
+      - name: Nexus | Template init.d script
+        template: src="{{role_dir}}/templates/init/nexus.init.j2" dest="/etc/init.d/nexus" mode="u=rwx,g=rx,o=rx"
+        become: yes
+        tags:
+          - nexus
+
+      - name: Nexus | Populate rc.d
+        shell: update-rc.d nexus defaults
+        when: ansible_os_family == "debian"
+        become: yes
+        tags:
+          - nexus
+
+      - name: Nexus | Populate rc.d
+        shell: /sbin/chkconfig --add nexus
+        when: ansible_os_family == "redhat"
+        become: yes
+        tags:
+          - nexus
+
+    when: upstart_system == "upstart"
+
+  - name: Nexus | Enable and start service
+    service: name="nexus" state="restarted" enabled="yes"
+    when: docker_test is not defined
+    become: yes
+    tags:
+     - nexus

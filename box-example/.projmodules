@@ -1,0 +1,3 @@
+[submodule "roles/sa-sonatype-nexus"]
+        path = roles/sa-sonatype-nexus
+        url = https://github.com/softasap/sa-sonatype-nexus.git

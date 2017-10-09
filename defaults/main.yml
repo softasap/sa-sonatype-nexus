@@ -1,0 +1,13 @@
+# defaults file
+
+role_dir: "{{ role_path }}"
+role_fact_group_name: "{{role_name.replace('-','_')}}"
+
+nexus_version: "3.6.0-02"
+
+nexus_user: nexus
+
+nexus_base_install_dir: /opt/nexus
+nexus_home_dir: "{{nexus_base_install_dir}}"
+
+nexus_distribution_url: http://download.sonatype.com/nexus/3
