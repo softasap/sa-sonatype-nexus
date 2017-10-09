@@ -14,7 +14,7 @@
       - nexus
 
   - name: Nexus | Create Nexus user
-    user: name="{{nexus_user}}" group="{{nexus_user}}"  comment="Sonatype Nexus user" home="{{ nexus_home_dir }}" shell="/bin/bash" createhome="yes"
+    user: name="{{nexus_user}}" group="{{nexus_user}}"  comment="Sonatype Nexus user" home="{{ nexus_base_install_dir }}" shell="/bin/bash" createhome="yes"
     become: yes
     tags:
       - nexus
@@ -26,14 +26,22 @@
       sha256sum: '{{ nexus_sha256sum | default(omit) }}'
       force: no
       validate_certs: no
+    become: yes
+    become_user: "{{nexus_user}}"
     when: nexus_exists | failed
     tags:
       - nexus
 
   - name: Nexus | Unpack distribution
-    unarchive: src="/tmp/nexus-{{ nexus_version }}-unix.tar.gz" dest="{{ nexus_base_install_dir }}" remote_src="yes" owner="nexus" group="root" mode="g=rw,o-w" creates="{{ nexus_base_install_dir }}/nexus-{{ nexus_version }}"
+    unarchive:
+      src: "/tmp/nexus-{{ nexus_version }}-unix.tar.gz"
+      dest: "{{ nexus_base_install_dir }}"
+      remote_src: "yes"
+      owner: "{{nexus_user}}"
+      creates: "{{ nexus_base_install_dir }}/nexus-{{ nexus_version }}"
     when: nexus_exists | failed
     become: yes
+    become_user: "{{nexus_user}}"
     tags:
       - nexus
 
@@ -81,6 +89,27 @@
           - nexus
 
     when: upstart_system == "upstart"
+
+  - name: Nexus | Patch nexus.rc settings {{ nexus_base_install_dir }}/nexus/bin/nexus.rc
+    lineinfile: dest="{{ nexus_base_install_dir }}/nexus/bin/nexus.rc"  regexp="{{item.regexp}}" line="{{item.line}}" insertafter="{{item.insertafter | default('EOF')}}"
+    with_items: "{{nexus_rc_properties | default([])}}"
+    become: yes
+    tags:
+     - nexus
+
+  - name: Nexus | Patch nexus.vmoptions settings {{ nexus_base_install_dir }}/nexus/bin/nexus.vmoptions
+    lineinfile: dest="{{ nexus_base_install_dir }}/nexus/bin/nexus.vmoptions"  regexp="{{item.regexp}}" line="{{item.line}}" insertafter="{{item.insertafter | default('EOF')}}"
+    with_items: "{{nexus_vm_options_properties | default([])}}"
+    become: yes
+    tags:
+     - nexus
+
+  - name: Nexus | Patch nexus-default.properties settings {{ nexus_base_install_dir }}/nexus/etc/nexus-default.properties
+    lineinfile: dest="{{ nexus_base_install_dir }}/nexus/etc/nexus-default.properties"  regexp="{{item.regexp}}" line="{{item.line}}" insertafter="{{item.insertafter | default('EOF')}}"
+    with_items: "{{nexus_vm_options_properties | default([])}}"
+    become: yes
+    tags:
+     - nexus
 
   - name: Nexus | Enable and start service
     service: name="nexus" state="restarted" enabled="yes"

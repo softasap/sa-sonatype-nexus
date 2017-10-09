@@ -8,6 +8,37 @@ nexus_version: "3.6.0-02"
 nexus_user: nexus
 
 nexus_base_install_dir: /opt/nexus
-nexus_home_dir: "{{nexus_base_install_dir}}"
+nexus_home_dir: "{{nexus_base_install_dir}}/nexus"
+
+nexus_vmoptions_ms: 1200M
+nexus_vmoptions_mx: 1200M
+
+# todo: support password change on first login via api
+nexus_admin_username: admin
+nexus_admin_pass: nexus123
+
+nexus_log_file: "{{nexus_base_install_dir}}/sonatype-work/nexus3/log/jvm.log"
+nexus_karaf_data: "{{nexus_base_install_dir}}/sonatype-work/nexus3"
+nexus_java_io_tmpdir: "{{nexus_base_install_dir}}/sonatype-work/nexus3/tmp"
+
+nexus_port: 8081
+nexus_listen_address: "0.0.0.0"
+nexus_context_path: "/"
 
 nexus_distribution_url: http://download.sonatype.com/nexus/3
+
+
+nexus_rc_properties:
+  - {regexp: "^(#)?run_as_user=", line: "run_as_user=\"{{ nexus_user }}\""}
+
+nexus_vm_options_properties:
+  - {regexp: "^-Xms*", line: "-Xms{{ nexus_vmoptions_ms }}"}
+  - {regexp: "^-Xmx*", line: "-Xmx{{ nexus_vmoptions_mx }}"}
+  - {regexp: "^-XX:LogFile=*", line: "-XX:LogFile={{ nexus_log_file }}"}
+  - {regexp: "^-Dkaraf.data=*", line: "-Dkaraf.data={{ nexus_karaf_data }}"}
+  - {regexp: "^-Djava.io.tmpdir=*", line: "-Djava.io.tmpdir={{ nexus_java_io_tmpdir }}"}
+
+nexus_default_properties:
+  - {regexp: "^application-port=*", line: "application-port={{ nexus_port }}"}
+  - {regexp: "^application-host=*", line: "application-host={{ nexus_listen_address }}"}
+  - {regexp: "^nexus-context-path=*", line: "application-host={{ nexus_context_path }}"}
