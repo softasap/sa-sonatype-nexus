@@ -3,3 +3,7 @@
   - include: __detect_init_system.yml
 
   - include: tasks_nexus.yml
+
+  - include: "tasks_nexus_proxy.yml"
+    when: option_configure_for_proxy
+

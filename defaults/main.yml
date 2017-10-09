@@ -42,3 +42,20 @@ nexus_default_properties:
   - {regexp: "^application-port=*", line: "application-port={{ nexus_port }}"}
   - {regexp: "^application-host=*", line: "application-host={{ nexus_listen_address }}"}
   - {regexp: "^nexus-context-path=*", line: "application-host={{ nexus_context_path }}"}
+
+# support for nginx
+
+option_configure_for_proxy: false
+option_use_pregenerated_pem: true
+option_serve_over_http: false
+
+nexus_domain: "vagrant.dev"
+nexus_host: "nexus"
+
+ssl_key_fqdn:  "{{nexus_host}}.{{nexus_domain}}"
+ssl_key_name:  bamboo_selfsigned
+ssl_cert_name: bamboo_selfsigned
+ssl_install_path: /etc/nginx
+ssl_files:
+  - "{{ssl_key_name}}.key"
+  - "{{ssl_cert_name}}.crt"
