@@ -19,7 +19,16 @@
 
   roles:
      - {
-        role: "sa-sonatype-nexus"
+        role: "sa-nginx"
+       }
+
+     - {
+        role: "sa-sonatype-nexus",
+        option_configure_for_proxy: true,
+        option_use_pregenerated_pem: true,
+        option_serve_over_http: true,
+        nexus_domain: "vagrant.dev",
+        nexus_host: "nexus"
        }
 
   tasks:

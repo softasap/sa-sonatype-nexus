@@ -27,30 +27,37 @@ Advanced
        role: "sa-sonatype-nexus",
        nexus_version: "3.6.0-02",
        nexus_user: nexus,
-       nexus_base_install_dir: /opt/nexus       
+       nexus_base_install_dir: /opt/nexus,
+
+       option_configure_for_proxy: true,
+       option_use_pregenerated_pem: true,
+       option_serve_over_http: true,
+       nexus_domain: "vagrant.dev",
+       nexus_host: "nexus"
      }
 
 ```
 
 
 
+
 Usage with ansible galaxy workflow
 ----------------------------------
 
-If you installed the `sa-nginx` role using the command
+If you installed the `sa-sonatype-nexus` role using the command
 
 
 `
-   ansible-galaxy install softasap.sa-nginx
+   ansible-galaxy install softasap.sa-sonatype-nexus
 `
 
-the role will be available in the folder `library/softasap.sa-nginx`
+the role will be available in the folder `library/softasap.sa-sonatype-nexus`
 Please adjust the path accordingly.
 
 ```YAML
 
      - {
-         role: "softasap.sa-nginx"
+         role: "softasap.sa-sonatype-nexus"
        }
 
 ```
