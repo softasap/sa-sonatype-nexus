@@ -6,6 +6,7 @@ RUN apt-get update -y
 RUN apt-get upgrade -y
 RUN apt-get install -y software-properties-common git python-dev wget apt-transport-https libffi-dev libssl-dev
 RUN apt-get install -y python-pip
+RUN apt-get install -y sudo
 RUN pip install -U pip
 RUN pip install ansible
 RUN mkdir -p /etc/ansible
